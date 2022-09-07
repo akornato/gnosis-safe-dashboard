@@ -1,4 +1,8 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a [Gnosis Safe](https://gnosis-safe.io) custom app, deployed to https://gnosis-safe-dashboard-flax.vercel.app
+
+- [Next.js](https://nextjs.org/)
+- [Wagmi](https://wagmi.sh/)
+- [safe-apps-sdk](https://github.com/safe-global/safe-apps-sdk)
 
 ## Getting Started
 
@@ -10,25 +14,6 @@ npm run dev
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [https://localhost:4000/](https://localhost:4000/) with your browser to see the result. Withouth Gnosis you can connect to wallets/networks and that's it.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
-
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+For full functionality, go to your Gnosis Safe, Apps, add custom app, and paste in the url, i.e. `https://localhost:4000/` (note the HTTPS rather than HTTP - SSL is required for Gnosis custom apps). You'll then see your Gnosis Safe owner addresses, replaced with ENS names if available.
