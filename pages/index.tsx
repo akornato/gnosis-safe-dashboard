@@ -4,31 +4,17 @@ import {
   Heading,
   Box,
   Button,
-  List,
-  ListItem,
-  ListIcon,
   Alert,
   AlertIcon,
   AlertDescription,
 } from "@chakra-ui/react";
-import { MdTagFaces, MdCheckCircle } from "react-icons/md";
-import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
-import { useAccount, useConnect, useEnsName, useNetwork } from "wagmi";
+import { useConnect, useNetwork } from "wagmi";
 import { ConnectorsModal } from "../components/ConnectorsModal";
 import { Transaction } from "../components/Transaction";
+import { Safe } from "../components/Safe";
 
-const Owner: React.FC<{ address: string }> = ({ address }) => {
-  const ensName = useEnsName({
-    address,
-  });
-  return <>{ensName.data || address}</>;
-};
-
-const Safe: NextPage = () => {
-  const { sdk, connected: safeConnected, safe } = useSafeAppsSDK();
+const Home: NextPage = () => {
   const { activeConnector, connect, connectors } = useConnect();
-  const { data: accountData } = useAccount();
-  const { data: ensNameData } = useEnsName({ address: accountData?.address });
   const {
     activeChain,
     chains,
@@ -37,12 +23,6 @@ const Safe: NextPage = () => {
     pendingChainId,
     switchNetwork,
   } = useNetwork();
-
-  useEffect(() => {
-    if (safeConnected) {
-      sdk.safe.requestAddressBook().then(console.log).catch(console.log);
-    }
-  }, [safeConnected, sdk.safe]);
 
   useEffect(() => {
     // autoconnect wagmi to Safe if available
@@ -102,31 +82,9 @@ const Safe: NextPage = () => {
         </Box>
       )}
 
-      {safeConnected && (
-        <>
-          <Box mb={4}>
-            <Alert status="success">
-              <AlertIcon as={MdCheckCircle} color="green.500" />
-              <AlertDescription>Gnosis Safe detected!</AlertDescription>
-            </Alert>
-          </Box>
-          <Box mb={4}>
-            Safe address connected: {ensNameData ?? accountData?.address}
-            {ensNameData ? ` (${accountData?.address})` : null}
-          </Box>
-          <Heading size="md">Safe Owners:</Heading>
-          <List spacing={3} pt={4}>
-            {safe.owners.map((owner) => (
-              <ListItem key={owner}>
-                <ListIcon as={MdTagFaces} color="green.500" />
-                <Owner address={owner} />
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
+      <Safe />
     </Box>
   );
 };
 
-export default Safe;
+export default Home;
