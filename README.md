@@ -1,4 +1,10 @@
-This is a [Gnosis Safe](https://gnosis-safe.io) custom app, deployed to https://gnosis-safe-dashboard-flax.vercel.app
+This is a [Gnosis Safe](https://gnosis-safe.io) custom app.
+
+If loaded in Gnosis Safe iframe, it uses Safe connector automatically and shows Safe address connected, Safe owners etc.
+
+If loaded outside Gnosis Safe iframe, or disconnected from Safe, it falls back to basic functionality of wallet/network selection and send transaction.
+
+Deployed to https://gnosis-safe-dashboard-flax.vercel.app
 
 - [Next.js](https://nextjs.org/)
 - [Wagmi](https://wagmi.sh/)
