@@ -13,14 +13,9 @@ import {
 } from "@chakra-ui/react";
 import { MdTagFaces, MdCheckCircle } from "react-icons/md";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
-import {
-  useAccount,
-  useConnect,
-  useEnsName,
-  useSendTransaction,
-  useNetwork,
-} from "wagmi";
+import { useAccount, useConnect, useEnsName, useNetwork } from "wagmi";
 import { ConnectorsModal } from "../components/ConnectorsModal";
+import { Transaction } from "../components/Transaction";
 
 const Owner: React.FC<{ address: string }> = ({ address }) => {
   const ensName = useEnsName({
@@ -32,12 +27,6 @@ const Owner: React.FC<{ address: string }> = ({ address }) => {
 const Safe: NextPage = () => {
   const { sdk, connected: safeConnected, safe } = useSafeAppsSDK();
   const { activeConnector, connect, connectors } = useConnect();
-  const { sendTransaction } = useSendTransaction({
-    request: {
-      to: "awkweb.eth",
-      value: "10000000000000000", // 0.01 ETH
-    },
-  });
   const { data: accountData } = useAccount();
   const { data: ensNameData } = useEnsName({ address: accountData?.address });
   const {
@@ -84,36 +73,34 @@ const Safe: NextPage = () => {
 
       {switchNetwork && (
         <>
-          <Box mb={4}>
-            {chains.map((x) => (
-              <Button
-                mr={4}
-                key={x.id}
-                onClick={() => switchNetwork(x.id)}
-                disabled={x.id === activeChain?.id}
-                colorScheme={x.id === activeChain?.id ? "green" : "gray"}
-              >
-                {x.name}
-                {isLoading && x.id === pendingChainId && " (switching)"}
-              </Button>
-            ))}
-          </Box>
+          {chains.map((x) => (
+            <Button
+              mr={4}
+              mb={4}
+              key={x.id}
+              onClick={() => switchNetwork(x.id)}
+              disabled={x.id === activeChain?.id}
+              colorScheme={x.id === activeChain?.id ? "green" : "gray"}
+            >
+              {x.name}
+              {isLoading && x.id === pendingChainId && " (switching)"}
+            </Button>
+          ))}
+
           {networkError && (
-            <Box mb={4}>
-              <Alert status="error">
-                <AlertIcon />
-                <AlertDescription>{networkError.message}</AlertDescription>
-              </Alert>
-            </Box>
+            <Alert status="error" mb={4}>
+              <AlertIcon />
+              <AlertDescription>{networkError.message}</AlertDescription>
+            </Alert>
           )}
         </>
       )}
 
-      <Box mb={4}>
-        {activeConnector && (
-          <Button onClick={() => sendTransaction()}>Test transaction</Button>
-        )}
-      </Box>
+      {activeConnector && (
+        <Box mb={4}>
+          <Transaction />
+        </Box>
+      )}
 
       {safeConnected && (
         <>
