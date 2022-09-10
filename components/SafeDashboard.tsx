@@ -3,7 +3,9 @@ import {
   ButtonGroup,
   IconButton,
   Heading,
+  InputGroup,
   Input,
+  InputLeftAddon,
   Box,
   List,
   ListItem,
@@ -13,7 +15,7 @@ import {
   AlertDescription,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import { MdTagFaces, MdCheckCircle, MdDangerous } from "react-icons/md";
+import { MdTagFaces, MdCheckCircle } from "react-icons/md";
 import { ethers } from "ethers";
 import { useSigner, useEnsName } from "wagmi";
 import Safe from "@gnosis.pm/safe-core-sdk";
@@ -29,13 +31,21 @@ const Address: React.FC<{ address: string }> = ({ address }) => {
 
 export const SafeDashboard: React.FC = () => {
   const { safe: safeInfo } = useSafeAppsSDK();
+  const [safeAddress, setSafeAddress] = useState<string>("");
+  const [error, setError] = useState<Error>();
   const [safe, setSafe] = useState<Safe>();
+  const [owners, setOwners] = useState<string[]>();
   const { data: signer } = useSigner();
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>();
 
   useEffect(() => {
+    setSafeAddress(safeInfo.safeAddress);
+  }, [safeInfo.safeAddress]);
+
+  useEffect(() => {
     (async () => {
-      if (signer && safeInfo.safeAddress) {
+      if (signer && safeAddress) {
+        setError(undefined);
         const ethAdapter = new EthersAdapter({
           ethers,
           signer,
@@ -43,17 +53,19 @@ export const SafeDashboard: React.FC = () => {
         try {
           const safe = await Safe.create({
             ethAdapter,
-            safeAddress: safeInfo.safeAddress,
+            safeAddress: safeAddress,
           });
           setSafe(safe);
-        } catch (e) {
-          console.log(e);
+          safe.getOwners().then(setOwners).catch(console.log);
+        } catch (e: any) {
+          setError(e);
+          setSafe(undefined);
         }
       } else {
         setSafe(undefined);
       }
     })();
-  }, [signer, safeInfo.safeAddress]);
+  }, [signer, safeAddress]);
 
   const addNewOwner = useCallback(async () => {
     if (safe && newOwnerAddress) {
@@ -67,26 +79,41 @@ export const SafeDashboard: React.FC = () => {
 
   return (
     <>
-      <Box>
-        {safeInfo.safeAddress ? (
+      <InputGroup>
+        <InputLeftAddon>Safe address</InputLeftAddon>
+        <Input
+          value={safeAddress}
+          onChange={(event) => setSafeAddress(event.target.value)}
+        />
+      </InputGroup>
+
+      {error && (
+        <Alert mt={4} status="error">
+          <AlertIcon />
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
+      )}
+
+      <Box mt={4}>
+        {safe ? (
           <Alert status="success">
             <AlertIcon as={MdCheckCircle} color="green.500" />
             <AlertDescription>Gnosis Safe detected!</AlertDescription>
           </Alert>
         ) : (
           <Alert status="error">
-            <AlertIcon as={MdDangerous} color="red.500" />
+            <AlertIcon />
             <AlertDescription>Gnosis Safe not detected!</AlertDescription>
           </Alert>
         )}
       </Box>
-      {safeInfo.safeAddress && (
+
+      {safe && owners && (
         <>
-          <Box mt={4}>Safe address: {safeInfo.safeAddress}</Box>
           <Box mt={4}>
             <Heading size="sm">Safe Owners:</Heading>
             <List spacing={3} mt={4}>
-              {safeInfo.owners.map((owner) => (
+              {owners.map((owner) => (
                 <ListItem key={owner}>
                   <ListIcon as={MdTagFaces} color="green.500" />
                   <Address address={owner} />
@@ -96,6 +123,7 @@ export const SafeDashboard: React.FC = () => {
           </Box>
         </>
       )}
+
       {safe && (
         <>
           <ButtonGroup mt={4} variant="outline">

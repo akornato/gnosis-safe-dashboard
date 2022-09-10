@@ -8,9 +8,9 @@ import {
   AlertIcon,
   AlertDescription,
 } from "@chakra-ui/react";
+import { MdCheckCircle } from "react-icons/md";
 import { useConnect, useNetwork } from "wagmi";
 import { ConnectorsModal } from "../components/ConnectorsModal";
-import { Transaction } from "../components/Transaction";
 import { SafeDashboard } from "../components/SafeDashboard";
 
 const Home: NextPage = () => {
@@ -29,17 +29,18 @@ const Home: NextPage = () => {
       <Box>
         <Heading size="md">Gnosis Safe Dashboard</Heading>
       </Box>
-
-      {activeChain && (
-        <Box mt={4}>
-          Connected to {activeChain.name ?? activeChain.id} via{" "}
-          {activeConnector?.name}
-          {activeChain?.unsupported && " (unsupported)"}
-        </Box>
-      )}
       <Box mt={4}>
         <ConnectorsModal />
       </Box>
+      {activeChain && (
+        <Alert mt={4} status="success">
+          <AlertIcon as={MdCheckCircle} color="green.500" />
+          <AlertDescription>
+            Connected to {activeChain.name ?? activeChain.id} via{" "}
+            {activeConnector?.name}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {switchNetwork && (
         <>
@@ -68,12 +69,9 @@ const Home: NextPage = () => {
 
       {activeConnector && (
         <Box mt={4}>
-          <Transaction />
+          <SafeDashboard />
         </Box>
       )}
-      <Box mt={4}>
-        <SafeDashboard />
-      </Box>
     </Box>
   );
 };
