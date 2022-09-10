@@ -13,6 +13,7 @@ import {
   Alert,
   AlertIcon,
   AlertDescription,
+  Spinner,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
 import { MdTagFaces, MdCheckCircle } from "react-icons/md";
@@ -33,6 +34,7 @@ export const SafeDashboard: React.FC = () => {
   const { safe: safeInfo } = useSafeAppsSDK();
   const [safeAddress, setSafeAddress] = useState<string>("");
   const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState<boolean>(false);
   const [safe, setSafe] = useState<Safe>();
   const [owners, setOwners] = useState<string[]>();
   const { data: signer } = useSigner();
@@ -45,7 +47,9 @@ export const SafeDashboard: React.FC = () => {
   useEffect(() => {
     (async () => {
       if (signer && safeAddress) {
+        setSafe(undefined);
         setError(undefined);
+        setLoading(true);
         const ethAdapter = new EthersAdapter({
           ethers,
           signer,
@@ -55,14 +59,18 @@ export const SafeDashboard: React.FC = () => {
             ethAdapter,
             safeAddress: safeAddress,
           });
-          setSafe(safe);
           safe.getOwners().then(setOwners).catch(console.log);
+          setSafe(safe);
+          setLoading(false);
         } catch (e: any) {
-          setError(e);
           setSafe(undefined);
+          setError(e);
+          setLoading(false);
         }
       } else {
         setSafe(undefined);
+        setError(undefined);
+        setLoading(false);
       }
     })();
   }, [signer, safeAddress]);
@@ -87,6 +95,16 @@ export const SafeDashboard: React.FC = () => {
         />
       </InputGroup>
 
+      {loading && (
+        <Spinner
+          mt={4}
+          thickness="4px"
+          speed="0.65s"
+          color="green.500"
+          size="xl"
+        />
+      )}
+
       {error && (
         <Alert mt={4} status="error">
           <AlertIcon />
@@ -95,15 +113,10 @@ export const SafeDashboard: React.FC = () => {
       )}
 
       <Box mt={4}>
-        {safe ? (
+        {safe && (
           <Alert status="success">
             <AlertIcon as={MdCheckCircle} color="green.500" />
             <AlertDescription>Gnosis Safe detected!</AlertDescription>
-          </Alert>
-        ) : (
-          <Alert status="error">
-            <AlertIcon />
-            <AlertDescription>Gnosis Safe not detected!</AlertDescription>
           </Alert>
         )}
       </Box>
