@@ -1,7 +1,6 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { ChakraProvider } from "@chakra-ui/react";
-import SafeProvider from "@gnosis.pm/safe-apps-react-sdk";
 import {
   WagmiConfig,
   configureChains,
@@ -9,7 +8,7 @@ import {
   defaultChains,
 } from "wagmi";
 import { alchemyProvider } from "wagmi/providers/alchemy";
-import { SafeConnector } from "@gnosis.pm/safe-apps-wagmi";
+import SafeProvider from "@gnosis.pm/safe-apps-react-sdk";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
@@ -19,9 +18,7 @@ const { chains, provider, webSocketProvider } = configureChains(defaultChains, [
 ]);
 
 const wagmiClient = createClient({
-  autoConnect: false, // Wagmi library automatically connects to the last used provider, but instead we want to automatically connect to the Safe if the app is loaded in the Safe Context.
   connectors: [
-    new SafeConnector({ chains }),
     new MetaMaskConnector({ chains }),
     new WalletConnectConnector({
       chains,

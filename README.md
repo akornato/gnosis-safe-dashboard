@@ -1,14 +1,13 @@
 ## Gnosis Safe dashboard
 
-If loaded in [Gnosis Safe](https://gnosis-safe.io) iframe, it uses Safe connector automatically and shows Safe address connected, Safe owners etc.
-
-If loaded outside Gnosis Safe iframe, or disconnected from Safe, it retains the basic functionality of wallet/network selection and send transaction.
+If loaded in [Gnosis Safe](https://gnosis-safe.io) iframe, it detects Safe address automatically. If loaded outside Gnosis Safe iframe, it retains the basic functionality of wallet/network selection.
 
 Deployed to https://gnosis-safe-dashboard-flax.vercel.app
 
 - [Next.js](https://nextjs.org/)
 - [Wagmi](https://wagmi.sh/)
-- [safe-apps-sdk](https://github.com/safe-global/safe-apps-sdk)
+- [Safe Apps SDK](https://github.com/safe-global/safe-apps-sdk) - to get Safe address automatically when inside of Gnosis Safe iframe
+- [Safe Core SDK](https://github.com/safe-global/safe-core-sdk) - to interact with the Safe contract i.e. add new owners
 
 ## Getting Started
 
