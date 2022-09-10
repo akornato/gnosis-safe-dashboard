@@ -14,8 +14,9 @@ import {
   AlertIcon,
   AlertDescription,
   Spinner,
+  Tooltip,
 } from "@chakra-ui/react";
-import { AddIcon } from "@chakra-ui/icons";
+import { AddIcon, MinusIcon } from "@chakra-ui/icons";
 import { MdTagFaces, MdCheckCircle } from "react-icons/md";
 import { ethers } from "ethers";
 import { useSigner, useEnsName } from "wagmi";
@@ -85,6 +86,20 @@ export const SafeDashboard: React.FC = () => {
     }
   }, [safe, newOwnerAddress]);
 
+  const removeOwner = useCallback(
+    async (ownerAddress: string) => {
+      if (safe) {
+        const safeTransaction = await safe.createRemoveOwnerTx({
+          ownerAddress,
+          threshold: 1,
+        });
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        await txResponse.transactionResponse?.wait();
+      }
+    },
+    [safe]
+  );
+
   return (
     <>
       <InputGroup>
@@ -126,10 +141,19 @@ export const SafeDashboard: React.FC = () => {
           <Box mt={4}>
             <Heading size="sm">Safe Owners:</Heading>
             <List spacing={3} mt={4}>
-              {owners.map((owner) => (
-                <ListItem key={owner}>
+              {owners.map((ownerAddress) => (
+                <ListItem key={ownerAddress}>
                   <ListIcon as={MdTagFaces} color="green.500" />
-                  <Address address={owner} />
+                  <Address address={ownerAddress} />
+                  <Tooltip label="Remove owner">
+                    <IconButton
+                      ml={2}
+                      aria-label="Remove owner"
+                      size="xs"
+                      icon={<MinusIcon />}
+                      onClick={() => removeOwner(ownerAddress)}
+                    />
+                  </Tooltip>
                 </ListItem>
               ))}
             </List>
