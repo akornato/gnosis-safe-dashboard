@@ -83,6 +83,7 @@ export const SafeDashboard: React.FC = () => {
       });
       const txResponse = await safe.executeTransaction(safeTransaction);
       await txResponse.transactionResponse?.wait();
+      safe.getOwners().then(setOwners).catch(console.log);
     }
   }, [safe, newOwnerAddress]);
 
@@ -95,6 +96,7 @@ export const SafeDashboard: React.FC = () => {
         });
         const txResponse = await safe.executeTransaction(safeTransaction);
         await txResponse.transactionResponse?.wait();
+        safe.getOwners().then(setOwners).catch(console.log);
       }
     },
     [safe]
