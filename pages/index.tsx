@@ -40,15 +40,16 @@ const Home: NextPage = () => {
         <>
           {chains.map((x) => (
             <Button
+              isLoading={isLoading && x.id === pendingChainId}
               mr={2}
               mt={4}
               key={x.id}
               onClick={() => switchNetwork(x.id)}
               disabled={x.id === chain?.id}
               colorScheme={x.id === chain?.id ? "green" : "gray"}
+              loadingText={x.name}
             >
               {x.name}
-              {isLoading && x.id === pendingChainId && " (switching)"}
             </Button>
           ))}
 

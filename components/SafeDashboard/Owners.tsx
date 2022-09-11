@@ -22,7 +22,7 @@ const Address: React.FC<{ address: string }> = ({ address }) => {
   const ensName = useEnsName({
     address,
   });
-  return <>{ensName.data || address}</>;
+  return <>{address + (ensName.data ? ` (${ensName.data})` : "")}</>;
 };
 
 export const Owners: React.FC<{
@@ -31,7 +31,8 @@ export const Owners: React.FC<{
   const [owners, setOwners] = useState<string[]>([]);
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>();
   const [error, setError] = useState<Error>();
-  const [ownersLoading, setOwnersLoading] = useState<string[]>([]);
+  const [removeOwnersLoading, setRemoveOwnersLoading] = useState<string[]>([]);
+  const [addOwnerLoading, setAddOwnerLoading] = useState<boolean>(false);
 
   useEffect(() => {
     try {
@@ -46,6 +47,7 @@ export const Owners: React.FC<{
     if (newOwnerAddress) {
       try {
         setError(undefined);
+        setAddOwnerLoading(true);
         const safeTransaction = await safe?.createAddOwnerTx({
           ownerAddress: newOwnerAddress,
         });
@@ -54,6 +56,8 @@ export const Owners: React.FC<{
         setOwners(await safe.getOwners());
       } catch (e: any) {
         setError(e);
+      } finally {
+        setAddOwnerLoading(false);
       }
     }
   }, [safe, newOwnerAddress]);
@@ -62,7 +66,7 @@ export const Owners: React.FC<{
     async (ownerAddress: string) => {
       try {
         setError(undefined);
-        setOwnersLoading((ownersLoading) => [...ownersLoading, ownerAddress]);
+        setRemoveOwnersLoading((owners) => [...owners, ownerAddress]);
         const safeTransaction = await safe.createRemoveOwnerTx({
           ownerAddress,
           threshold: 1,
@@ -73,8 +77,8 @@ export const Owners: React.FC<{
       } catch (e: any) {
         setError(e);
       } finally {
-        setOwnersLoading((ownersLoading) =>
-          ownersLoading.filter((address) => address !== ownerAddress)
+        setRemoveOwnersLoading((owners) =>
+          owners.filter((address) => address !== ownerAddress)
         );
       }
     },
@@ -92,7 +96,7 @@ export const Owners: React.FC<{
               <Address address={ownerAddress} />
               <Tooltip label="Remove owner">
                 <IconButton
-                  isLoading={ownersLoading.includes(ownerAddress)}
+                  isLoading={removeOwnersLoading.includes(ownerAddress)}
                   ml={2}
                   aria-label="Remove owner"
                   size="xs"
@@ -111,6 +115,7 @@ export const Owners: React.FC<{
         />
         <IconButton
           aria-label="Add new owner"
+          isLoading={addOwnerLoading}
           icon={<AddIcon />}
           onClick={addNewOwner}
         />

@@ -31,10 +31,10 @@ export const SendTransaction: React.FC<{
           },
         });
         const txResponse = await safe.executeTransaction(safeTransaction);
-        setLoading(false);
         await txResponse.transactionResponse?.wait();
       } catch (e: any) {
         setError(e);
+      } finally {
         setLoading(false);
       }
     }
@@ -67,6 +67,7 @@ export const SendTransaction: React.FC<{
           isLoading={loading}
           disabled={!address || loading}
           onClick={sendTransaction}
+          loadingText={"Send from Safe"}
         >
           Send from Safe
         </Button>
