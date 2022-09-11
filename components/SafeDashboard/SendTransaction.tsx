@@ -8,20 +8,18 @@ import {
   AlertDescription,
   Wrap,
 } from "@chakra-ui/react";
-import { useSigner } from "wagmi";
 import Safe from "@gnosis.pm/safe-core-sdk";
 
-export const Transaction: React.FC<{
+export const SendTransaction: React.FC<{
   safe: Safe;
-  signer: ReturnType<typeof useSigner>["data"];
-}> = ({ safe, signer }) => {
+}> = ({ safe }) => {
   const [address, setAddress] = useState<string>("");
   const [amount, setAmount] = useState<BigNumber>();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
 
   const sendTransaction = useCallback(async () => {
-    if (signer && address) {
+    if (address) {
       try {
         setError(undefined);
         setLoading(true);
@@ -40,7 +38,7 @@ export const Transaction: React.FC<{
         setLoading(false);
       }
     }
-  }, [address, amount, safe, signer]);
+  }, [address, amount, safe]);
 
   return (
     <>
@@ -67,7 +65,7 @@ export const Transaction: React.FC<{
         />
         <Button
           isLoading={loading}
-          disabled={!address || !amount || loading}
+          disabled={!address || loading}
           onClick={sendTransaction}
         >
           Send from Safe
