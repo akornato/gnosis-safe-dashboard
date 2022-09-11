@@ -31,6 +31,7 @@ export const Owners: React.FC<{
   const [owners, setOwners] = useState<string[]>([]);
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>();
   const [error, setError] = useState<Error>();
+  const [ownersLoading, setOwnersLoading] = useState<string[]>([]);
 
   useEffect(() => {
     try {
@@ -61,6 +62,7 @@ export const Owners: React.FC<{
     async (ownerAddress: string) => {
       try {
         setError(undefined);
+        setOwnersLoading((ownersLoading) => [...ownersLoading, ownerAddress]);
         const safeTransaction = await safe.createRemoveOwnerTx({
           ownerAddress,
           threshold: 1,
@@ -70,6 +72,10 @@ export const Owners: React.FC<{
         setOwners(await safe.getOwners());
       } catch (e: any) {
         setError(e);
+      } finally {
+        setOwnersLoading((ownersLoading) =>
+          ownersLoading.filter((address) => address !== ownerAddress)
+        );
       }
     },
     [safe]
@@ -86,6 +92,7 @@ export const Owners: React.FC<{
               <Address address={ownerAddress} />
               <Tooltip label="Remove owner">
                 <IconButton
+                  isLoading={ownersLoading.includes(ownerAddress)}
                   ml={2}
                   aria-label="Remove owner"
                   size="xs"
