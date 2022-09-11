@@ -15,13 +15,16 @@ export const Transaction: React.FC<{
   safe: Safe;
   signer: ReturnType<typeof useSigner>["data"];
 }> = ({ safe, signer }) => {
-  const [address, setAddress] = useState<string>();
+  const [address, setAddress] = useState<string>("");
   const [amount, setAmount] = useState<BigNumber>();
   const [error, setError] = useState<Error>();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const sendTransaction = useCallback(async () => {
     if (signer && address) {
       try {
+        setError(undefined);
+        setLoading(true);
         const safeTransaction = await safe.createTransaction({
           safeTransactionData: {
             to: address,
@@ -30,9 +33,11 @@ export const Transaction: React.FC<{
           },
         });
         const txResponse = await safe.executeTransaction(safeTransaction);
+        setLoading(false);
         await txResponse.transactionResponse?.wait();
       } catch (e: any) {
         setError(e);
+        setLoading(false);
       }
     }
   }, [address, amount, safe, signer]);
@@ -60,7 +65,13 @@ export const Transaction: React.FC<{
           placeholder="Amount (in Wei)"
           width="auto"
         />
-        <Button onClick={sendTransaction}>Send from Safe</Button>
+        <Button
+          isLoading={loading}
+          disabled={!address || !amount || loading}
+          onClick={sendTransaction}
+        >
+          Send from Safe
+        </Button>
       </Wrap>
       {error && (
         <Alert status="error" mt={4}>
