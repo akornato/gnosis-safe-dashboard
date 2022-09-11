@@ -1,4 +1,4 @@
-import { useConnect, useDisconnect } from "wagmi";
+import { useConnect, useDisconnect, useAccount } from "wagmi";
 
 import {
   Alert,
@@ -17,14 +17,9 @@ import {
 } from "@chakra-ui/react";
 
 export const ConnectorsModal: React.FC = () => {
-  const {
-    activeConnector,
-    connect,
-    connectors,
-    error,
-    isConnecting,
-    pendingConnector,
-  } = useConnect();
+  const { connector: activeConnector } = useAccount();
+  const { connect, connectors, error, isLoading, pendingConnector } =
+    useConnect();
   const { disconnect } = useDisconnect();
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
@@ -37,18 +32,21 @@ export const ConnectorsModal: React.FC = () => {
           <ModalCloseButton />
           <ModalBody>
             {connectors
-              .filter((x) => x.ready)
-              .map((x) => (
-                <Box key={x.id} mb={2}>
+              .filter((connector) => connector.ready)
+              .map((connector) => (
+                <Box key={connector.id} mb={2}>
                   <Button
                     onClick={() =>
-                      x.id !== activeConnector?.id ? connect(x) : disconnect()
+                      connector.id !== activeConnector?.id
+                        ? connect({ connector })
+                        : disconnect()
                     }
                   >
-                    {(x.id === activeConnector?.id ? "Disconnect from " : "") +
-                      x.name}
-                    {isConnecting &&
-                      x.id === pendingConnector?.id &&
+                    {(connector.id === activeConnector?.id
+                      ? "Disconnect from "
+                      : "") + connector.name}
+                    {isLoading &&
+                      connector.id === pendingConnector?.id &&
                       " (connecting)"}
                   </Button>
                 </Box>

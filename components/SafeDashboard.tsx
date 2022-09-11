@@ -23,6 +23,7 @@ import { useSigner, useEnsName } from "wagmi";
 import Safe from "@gnosis.pm/safe-core-sdk";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
+import { Transaction } from "./Transaction";
 
 const Address: React.FC<{ address: string }> = ({ address }) => {
   const ensName = useEnsName({
@@ -176,6 +177,9 @@ export const SafeDashboard: React.FC = () => {
               onClick={addNewOwner}
             />
           </ButtonGroup>
+          <Box mt={4}>
+            <Transaction safe={safe} signer={signer}/>
+          </Box>
         </>
       )}
     </>

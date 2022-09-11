@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { BigNumber } from "ethers";
 import {
   Input,
@@ -8,24 +8,42 @@ import {
   AlertDescription,
   Wrap,
 } from "@chakra-ui/react";
-import { useSendTransaction } from "wagmi";
+import { useSigner } from "wagmi";
+import Safe from "@gnosis.pm/safe-core-sdk";
 
-export const Transaction: React.FC = () => {
+export const Transaction: React.FC<{
+  safe: Safe;
+  signer: ReturnType<typeof useSigner>["data"];
+}> = ({ safe, signer }) => {
   const [address, setAddress] = useState<string>();
   const [amount, setAmount] = useState<BigNumber>();
-  const { sendTransaction, error } = useSendTransaction({
-    request: {
-      to: address,
-      value: amount,
-    },
-  });
+  const [error, setError] = useState<Error>();
+
+  const sendTransaction = useCallback(async () => {
+    if (signer && address) {
+      try {
+        const safeTransaction = await safe.createTransaction({
+          safeTransactionData: {
+            to: address,
+            value: (amount || BigNumber.from(0)).toString(),
+            data: "0x",
+          },
+        });
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        await txResponse.transactionResponse?.wait();
+      } catch (e: any) {
+        setError(e);
+      }
+    }
+  }, [address, amount, safe, signer]);
+
   return (
     <>
-      <Wrap direction="row" spacing={4}>
+      <Wrap direction="row" spacing={2}>
         <Input
           value={address}
           onChange={(event) => setAddress(event.target.value)}
-          placeholder="Tx address (or ENS)"
+          placeholder="To address (or ENS)"
           width="auto"
         />
         <Input
@@ -39,10 +57,10 @@ export const Transaction: React.FC = () => {
               setAmount(undefined);
             }
           }}
-          placeholder="Tx amount (in Wei)"
+          placeholder="Amount (in Wei)"
           width="auto"
         />
-        <Button onClick={() => sendTransaction()}>Send transaction</Button>
+        <Button onClick={sendTransaction}>Send from Safe</Button>
       </Wrap>
       {error && (
         <Alert status="error" mt={4}>

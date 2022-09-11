@@ -9,20 +9,15 @@ import {
   AlertDescription,
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
-import { useConnect, useNetwork } from "wagmi";
+import { useNetwork, useAccount, useSwitchNetwork } from "wagmi";
 import { ConnectorsModal } from "../components/ConnectorsModal";
 import { SafeDashboard } from "../components/SafeDashboard";
 
 const Home: NextPage = () => {
-  const { activeConnector } = useConnect();
-  const {
-    activeChain,
-    chains,
-    error: networkError,
-    isLoading,
-    pendingChainId,
-    switchNetwork,
-  } = useNetwork();
+  const { chain } = useNetwork();
+  const { chains, error, isLoading, pendingChainId, switchNetwork } =
+    useSwitchNetwork();
+  const { connector: activeConnector, address } = useAccount();
 
   return (
     <Box p={6}>
@@ -32,12 +27,11 @@ const Home: NextPage = () => {
       <Box mt={4}>
         <ConnectorsModal />
       </Box>
-      {activeChain && (
+      {chain && (
         <Alert mt={4} status="success">
           <AlertIcon as={MdCheckCircle} color="green.500" />
           <AlertDescription>
-            Connected to {activeChain.name ?? activeChain.id} via{" "}
-            {activeConnector?.name}
+            Connected to {address} via {activeConnector?.name}
           </AlertDescription>
         </Alert>
       )}
@@ -46,22 +40,22 @@ const Home: NextPage = () => {
         <>
           {chains.map((x) => (
             <Button
-              mr={4}
+              mr={2}
               mt={4}
               key={x.id}
               onClick={() => switchNetwork(x.id)}
-              disabled={x.id === activeChain?.id}
-              colorScheme={x.id === activeChain?.id ? "green" : "gray"}
+              disabled={x.id === chain?.id}
+              colorScheme={x.id === chain?.id ? "green" : "gray"}
             >
               {x.name}
               {isLoading && x.id === pendingChainId && " (switching)"}
             </Button>
           ))}
 
-          {networkError && (
+          {error && (
             <Alert status="error" mt={4}>
               <AlertIcon />
-              <AlertDescription>{networkError.message}</AlertDescription>
+              <AlertDescription>{error.message}</AlertDescription>
             </Alert>
           )}
         </>
