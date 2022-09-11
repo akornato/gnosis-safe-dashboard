@@ -11,6 +11,9 @@ import {
   ListItem,
   ListIcon,
   Tooltip,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
 import { MdTagFaces } from "react-icons/md";
@@ -27,32 +30,46 @@ export const Owners: React.FC<{
 }> = ({ safe }) => {
   const [owners, setOwners] = useState<string[]>([]);
   const [newOwnerAddress, setNewOwnerAddress] = useState<string>();
+  const [error, setError] = useState<Error>();
 
   useEffect(() => {
-    safe.getOwners().then(setOwners).catch(console.log);
+    try {
+      setError(undefined);
+      safe.getOwners().then(setOwners).catch(console.log);
+    } catch (e: any) {
+      setError(e);
+    }
   }, [safe]);
 
   const addNewOwner = useCallback(async () => {
-    if (safe && newOwnerAddress) {
-      const safeTransaction = await safe?.createAddOwnerTx({
-        ownerAddress: newOwnerAddress,
-      });
-      const txResponse = await safe.executeTransaction(safeTransaction);
-      await txResponse.transactionResponse?.wait();
-      safe.getOwners().then(setOwners).catch(console.log);
+    if (newOwnerAddress) {
+      try {
+        setError(undefined);
+        const safeTransaction = await safe?.createAddOwnerTx({
+          ownerAddress: newOwnerAddress,
+        });
+        const txResponse = await safe.executeTransaction(safeTransaction);
+        await txResponse.transactionResponse?.wait();
+        setOwners(await safe.getOwners());
+      } catch (e: any) {
+        setError(e);
+      }
     }
   }, [safe, newOwnerAddress]);
 
   const removeOwner = useCallback(
     async (ownerAddress: string) => {
-      if (safe) {
+      try {
+        setError(undefined);
         const safeTransaction = await safe.createRemoveOwnerTx({
           ownerAddress,
           threshold: 1,
         });
         const txResponse = await safe.executeTransaction(safeTransaction);
         await txResponse.transactionResponse?.wait();
-        safe.getOwners().then(setOwners).catch(console.log);
+        setOwners(await safe.getOwners());
+      } catch (e: any) {
+        setError(e);
       }
     },
     [safe]
@@ -91,6 +108,12 @@ export const Owners: React.FC<{
           onClick={addNewOwner}
         />
       </ButtonGroup>
+      {error && (
+        <Alert status="error" mt={4}>
+          <AlertIcon />
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
+      )}
     </>
   );
 };
