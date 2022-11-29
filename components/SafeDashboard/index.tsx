@@ -25,7 +25,7 @@ export const SafeDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [safe, setSafe] = useState<Safe>();
   const { data: signer } = useSigner();
-
+  
   useEffect(() => {
     setSafeAddress(safeInfo.safeAddress);
   }, [safeInfo.safeAddress]);
@@ -43,7 +43,7 @@ export const SafeDashboard: React.FC = () => {
         try {
           const safe = await Safe.create({
             ethAdapter,
-            safeAddress: safeAddress,
+            safeAddress,
           });
           setSafe(safe);
           setLoading(false);
