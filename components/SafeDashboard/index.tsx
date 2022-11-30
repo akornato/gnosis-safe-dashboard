@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   InputGroup,
   Input,
@@ -16,6 +16,7 @@ import Safe from "@gnosis.pm/safe-core-sdk";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
 import { Owners } from "./Owners";
+import { NewSafe } from "./NewSafe";
 import { SendTransaction } from "./SendTransaction";
 
 export const SafeDashboard: React.FC = () => {
@@ -25,7 +26,7 @@ export const SafeDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [safe, setSafe] = useState<Safe>();
   const { data: signer } = useSigner();
-  
+
   useEffect(() => {
     setSafeAddress(safeInfo.safeAddress);
   }, [safeInfo.safeAddress]);
@@ -62,7 +63,9 @@ export const SafeDashboard: React.FC = () => {
 
   return (
     <>
-      <InputGroup>
+      <NewSafe setSafeAddress={setSafeAddress} />
+
+      <InputGroup mt={4}>
         <InputLeftAddon>Safe address</InputLeftAddon>
         <Input
           value={safeAddress}
