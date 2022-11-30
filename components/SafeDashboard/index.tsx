@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import {
   InputGroup,
   Input,
@@ -8,7 +9,6 @@ import {
   AlertIcon,
   AlertDescription,
   Spinner,
-  Heading,
   Text,
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
@@ -22,8 +22,8 @@ import { NewSafe } from "./NewSafe";
 import { SendTransaction } from "./SendTransaction";
 
 export const SafeDashboard: React.FC = () => {
+  const { query, push } = useRouter();
   const { safe: safeInfo } = useSafeAppsSDK();
-  const [safeAddress, setSafeAddress] = useState<string>("");
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
   const [safe, setSafe] = useState<Safe>();
@@ -33,10 +33,7 @@ export const SafeDashboard: React.FC = () => {
     addressOrName: safe?.getAddress(),
     enabled: !!safe,
   });
-
-  useEffect(() => {
-    setSafeAddress(safeInfo.safeAddress);
-  }, [safeInfo.safeAddress]);
+  const safeAddress = safeInfo.safeAddress || query?.safeAddress?.toString();
 
   useEffect(() => {
     (async () => {
@@ -73,13 +70,19 @@ export const SafeDashboard: React.FC = () => {
 
   return (
     <>
-      <NewSafe setSafeAddress={setSafeAddress} />
+      <NewSafe />
 
       <InputGroup mt={4}>
         <InputLeftAddon>Safe address</InputLeftAddon>
         <Input
-          value={safeAddress}
-          onChange={(event) => setSafeAddress(event.target.value)}
+          value={safeAddress || ""}
+          onChange={(event) =>
+            push({
+              query: event.target.value
+                ? { safeAddress: event.target.value }
+                : {},
+            })
+          }
         />
       </InputGroup>
 

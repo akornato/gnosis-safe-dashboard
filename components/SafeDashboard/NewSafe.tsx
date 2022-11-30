@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useRouter } from "next/router";
 import { ethers } from "ethers";
 import {
   Box,
@@ -17,9 +18,8 @@ import { useSigner } from "wagmi";
 import Safe, { SafeFactory, SafeAccountConfig } from "@gnosis.pm/safe-core-sdk";
 import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
 
-export const NewSafe: React.FC<{
-  setSafeAddress: (address: string) => void;
-}> = ({ setSafeAddress }) => {
+export const NewSafe: React.FC = () => {
+  const { push } = useRouter();
   const [owners, setOwners] = useState<string>();
   const [threshold, setThreshold] = useState<number>();
   const { data: signer } = useSigner();
@@ -41,10 +41,12 @@ export const NewSafe: React.FC<{
         threshold,
       };
       const safeSdk: Safe = await safeFactory.deploySafe({ safeAccountConfig });
-      setSafeAddress(safeSdk.getAddress());
+      push({
+        query: { safeAddress: safeSdk.getAddress() },
+      });
       setLoading(false);
     }
-  }, [signer, owners, threshold, setSafeAddress]);
+  }, [signer, owners, threshold, push]);
 
   return (
     <Accordion allowToggle backgroundColor="gray.50">
