@@ -12,7 +12,7 @@ import {
   AccordionButton,
   AccordionPanel,
   AccordionIcon,
-  Heading,
+  Text,
 } from "@chakra-ui/react";
 import { useSigner } from "wagmi";
 import Safe, { SafeFactory, SafeAccountConfig } from "@gnosis.pm/safe-core-sdk";
@@ -53,7 +53,7 @@ export const NewSafe: React.FC = () => {
       <AccordionItem>
         <AccordionButton px={4}>
           <Box flex="1" textAlign="left">
-            <Heading size="sm">New safe</Heading>
+            <Text>New safe</Text>
           </Box>
           <AccordionIcon />
         </AccordionButton>
@@ -75,9 +75,10 @@ export const NewSafe: React.FC = () => {
           </InputGroup>
           <Button
             mt={4}
-            colorScheme="blue"
+            colorScheme="green"
             onClick={create}
             isLoading={loading}
+            disabled={!owners || !threshold}
           >
             Create
           </Button>

@@ -1,13 +1,22 @@
 import Head from "next/head";
 import { ChakraProvider } from "@chakra-ui/react";
-import { getDefaultProvider } from "ethers";
-import { WagmiConfig, createClient } from "wagmi";
+import {
+  defaultChains,
+  WagmiConfig,
+  createClient,
+  configureChains,
+} from "wagmi";
 import SafeProvider from "@gnosis.pm/safe-apps-react-sdk";
+import { alchemyProvider } from "wagmi/providers/alchemy";
 import type { AppProps } from "next/app";
+
+const { provider } = configureChains(defaultChains, [
+  alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY }),
+]);
 
 const client = createClient({
   autoConnect: true,
-  provider: getDefaultProvider(),
+  provider,
 });
 
 function MyApp({ Component, pageProps }: AppProps) {

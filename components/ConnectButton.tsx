@@ -14,6 +14,7 @@ export const ConnectButton = () => {
 
   return isMounted ? (
     <Button
+      colorScheme="green"
       onClick={() =>
         isConnected ? disconnect() : connect({ connector: connectors[0] })
       }

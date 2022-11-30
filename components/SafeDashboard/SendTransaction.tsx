@@ -16,13 +16,20 @@ import Safe from "@gnosis.pm/safe-core-sdk";
 export const SendTransaction: React.FC<{
   safe: Safe;
 }> = ({ safe }) => {
-  const [toAddress, setToAddress] = useState<string>("");
+  const [toAddress, setToAddress] = useState<string>();
+  const [tokenAddress, setTokenAddress] = useState<string>();
   const [amount, setAmount] = useState<BigNumber>();
+  const [tokenAmount, setTokenAmount] = useState<BigNumber>();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
   const { data: safeBalance } = useBalance({
     addressOrName: safe?.getAddress(),
     enabled: !!safe,
+  });
+  const { data: tokenBalance, error: tokenError } = useBalance({
+    addressOrName: safe?.getAddress(),
+    token: tokenAddress,
+    enabled: !!safe && !!tokenAddress,
   });
 
   const sendTransaction = useCallback(async () => {
@@ -52,11 +59,10 @@ export const SendTransaction: React.FC<{
       <Text mt={4}>
         Safe balance: {safeBalance?.formatted} {safeBalance.symbol}
       </Text>
-
       <InputGroup mt={4}>
         <InputLeftAddon>Destination address</InputLeftAddon>
         <Input
-          value={toAddress}
+          value={toAddress || ""}
           onChange={(event) => setToAddress(event.target.value)}
         />
       </InputGroup>
@@ -64,7 +70,7 @@ export const SendTransaction: React.FC<{
         <InputLeftAddon>{safeBalance.symbol} amount in wei</InputLeftAddon>
         <Input
           type="number"
-          value={amount?.toString()}
+          value={amount?.toString() || ""}
           onChange={(event) => {
             try {
               const amount = BigNumber.from(event.target.value);
@@ -75,8 +81,38 @@ export const SendTransaction: React.FC<{
           }}
         />
       </InputGroup>
+      <InputGroup mt={4}>
+        <InputLeftAddon>Token address</InputLeftAddon>
+        <Input
+          value={tokenAddress || ""}
+          onChange={(event) => setTokenAddress(event.target.value)}
+        />
+      </InputGroup>
+      {tokenAddress && tokenBalance && (
+        <>
+          <Text mt={4}>
+            Token balance: {tokenBalance?.formatted} {tokenBalance.symbol}
+          </Text>
+          <InputGroup mt={4}>
+            <InputLeftAddon>{tokenBalance.symbol} amount in wei</InputLeftAddon>
+            <Input
+              type="number"
+              value={tokenAmount?.toString() || ""}
+              onChange={(event) => {
+                try {
+                  const tokenAmount = BigNumber.from(event.target.value);
+                  setTokenAmount(tokenAmount);
+                } catch {
+                  setTokenAmount(undefined);
+                }
+              }}
+            />
+          </InputGroup>
+        </>
+      )}
       <Button
         mt={4}
+        colorScheme="green"
         isLoading={loading}
         disabled={!toAddress || loading}
         onClick={sendTransaction}
@@ -84,10 +120,12 @@ export const SendTransaction: React.FC<{
       >
         Send from Safe
       </Button>
-      {error && (
+      {(error || tokenError) && (
         <Alert status="error" mt={4}>
           <AlertIcon />
-          <AlertDescription>{error.message}</AlertDescription>
+          <AlertDescription>
+            {error?.message || tokenError?.message}
+          </AlertDescription>
         </Alert>
       )}
     </>

@@ -4,16 +4,14 @@ import { useEnsName } from "wagmi";
 import {
   ButtonGroup,
   IconButton,
-  Heading,
+  Text,
   Input,
   Box,
-  List,
-  ListItem,
-  ListIcon,
-  Tooltip,
+  Icon,
   Alert,
   AlertIcon,
   AlertDescription,
+  Flex,
 } from "@chakra-ui/react";
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
 import { MdTagFaces } from "react-icons/md";
@@ -88,25 +86,22 @@ export const Owners: React.FC<{
   return (
     <>
       <Box mt={4}>
-        <Heading size="sm">Safe Owners:</Heading>
-        <List spacing={3} mt={4}>
-          {owners.map((ownerAddress) => (
-            <ListItem key={ownerAddress}>
-              <ListIcon as={MdTagFaces} color="green.500" />
-              <Address address={ownerAddress} />
-              <Tooltip label="Remove owner">
-                <IconButton
-                  isLoading={removeOwnersLoading.includes(ownerAddress)}
-                  ml={2}
-                  aria-label="Remove owner"
-                  size="xs"
-                  icon={<MinusIcon />}
-                  onClick={() => removeOwner(ownerAddress)}
-                />
-              </Tooltip>
-            </ListItem>
-          ))}
-        </List>
+        <Text>Owners:</Text>
+        {owners.map((ownerAddress) => (
+          <Flex key={ownerAddress} mt={4} alignItems="center">
+            <Icon boxSize={6} as={MdTagFaces} color="green.500" mr={2} />
+            <Address address={ownerAddress} />
+            <IconButton
+              size="xs"
+              colorScheme="green"
+              isLoading={removeOwnersLoading.includes(ownerAddress)}
+              ml={2}
+              aria-label="Remove owner"
+              icon={<MinusIcon />}
+              onClick={() => removeOwner(ownerAddress)}
+            />
+          </Flex>
+        ))}
       </Box>
       <ButtonGroup mt={4} variant="outline">
         <Input
@@ -114,6 +109,7 @@ export const Owners: React.FC<{
           onChange={(event) => setNewOwnerAddress(event.target.value)}
         />
         <IconButton
+          colorScheme="green"
           aria-label="Add new owner"
           isLoading={addOwnerLoading}
           icon={<AddIcon />}
