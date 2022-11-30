@@ -1,31 +1,38 @@
 import { useState, useCallback } from "react";
 import { BigNumber } from "ethers";
 import {
+  InputGroup,
+  InputLeftAddon,
   Input,
   Button,
   Alert,
   AlertIcon,
   AlertDescription,
-  Wrap,
+  Text,
 } from "@chakra-ui/react";
+import { useBalance } from "wagmi";
 import Safe from "@gnosis.pm/safe-core-sdk";
 
 export const SendTransaction: React.FC<{
   safe: Safe;
 }> = ({ safe }) => {
-  const [address, setAddress] = useState<string>("");
+  const [toAddress, setToAddress] = useState<string>("");
   const [amount, setAmount] = useState<BigNumber>();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
+  const { data: safeBalance } = useBalance({
+    addressOrName: safe?.getAddress(),
+    enabled: !!safe,
+  });
 
   const sendTransaction = useCallback(async () => {
-    if (address) {
+    if (toAddress) {
       try {
         setError(undefined);
         setLoading(true);
         const safeTransaction = await safe.createTransaction({
           safeTransactionData: {
-            to: address,
+            to: toAddress,
             value: (amount || BigNumber.from(0)).toString(),
             data: "0x",
           },
@@ -38,17 +45,23 @@ export const SendTransaction: React.FC<{
         setLoading(false);
       }
     }
-  }, [address, amount, safe]);
+  }, [toAddress, amount, safe]);
 
-  return (
+  return safeBalance ? (
     <>
-      <Wrap direction="row" spacing={2}>
+      <Text mt={4}>
+        Safe balance: {safeBalance?.formatted} {safeBalance.symbol}
+      </Text>
+
+      <InputGroup mt={4}>
+        <InputLeftAddon>Destination address</InputLeftAddon>
         <Input
-          value={address}
-          onChange={(event) => setAddress(event.target.value)}
-          placeholder="To address (or ENS)"
-          width="auto"
+          value={toAddress}
+          onChange={(event) => setToAddress(event.target.value)}
         />
+      </InputGroup>
+      <InputGroup mt={4}>
+        <InputLeftAddon>{safeBalance.symbol} amount in wei</InputLeftAddon>
         <Input
           type="number"
           value={amount?.toString()}
@@ -60,18 +73,17 @@ export const SendTransaction: React.FC<{
               setAmount(undefined);
             }
           }}
-          placeholder="Amount (in Wei)"
-          width="auto"
         />
-        <Button
-          isLoading={loading}
-          disabled={!address || loading}
-          onClick={sendTransaction}
-          loadingText={"Send from Safe"}
-        >
-          Send from Safe
-        </Button>
-      </Wrap>
+      </InputGroup>
+      <Button
+        mt={4}
+        isLoading={loading}
+        disabled={!toAddress || loading}
+        onClick={sendTransaction}
+        loadingText={"Send from Safe"}
+      >
+        Send from Safe
+      </Button>
       {error && (
         <Alert status="error" mt={4}>
           <AlertIcon />
@@ -79,5 +91,5 @@ export const SendTransaction: React.FC<{
         </Alert>
       )}
     </>
-  );
+  ) : null;
 };

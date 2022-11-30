@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
 import { ethers } from "ethers";
-import { useSigner, useBalance } from "wagmi";
+import { useSigner } from "wagmi";
 import Safe from "@gnosis.pm/safe-core-sdk";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
@@ -29,10 +29,6 @@ export const SafeDashboard: React.FC = () => {
   const [safe, setSafe] = useState<Safe>();
   const [threshold, setThreshold] = useState<number>();
   const { data: signer } = useSigner();
-  const { data: safeBalance } = useBalance({
-    addressOrName: safe?.getAddress(),
-    enabled: !!safe,
-  });
   const safeAddress = safeInfo.safeAddress || query?.safeAddress?.toString();
 
   useEffect(() => {
@@ -118,11 +114,6 @@ export const SafeDashboard: React.FC = () => {
             <Owners safe={safe} />
           </Box>
           <Text mt={4}>Threshold: {threshold}</Text>
-          {safeBalance && (
-            <Text mt={4}>
-              Safe balance: {safeBalance?.formatted} {safeBalance.symbol}
-            </Text>
-          )}
           <Box mt={4}>
             <SendTransaction safe={safe} />
           </Box>
