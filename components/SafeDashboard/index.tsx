@@ -8,6 +8,7 @@ import {
   AlertIcon,
   AlertDescription,
   Spinner,
+  Heading,
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
 import { ethers } from "ethers";
@@ -25,6 +26,7 @@ export const SafeDashboard: React.FC = () => {
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
   const [safe, setSafe] = useState<Safe>();
+  const [threshold, setThreshold] = useState<number>();
   const { data: signer } = useSigner();
 
   useEffect(() => {
@@ -47,14 +49,17 @@ export const SafeDashboard: React.FC = () => {
             safeAddress,
           });
           setSafe(safe);
+          setThreshold(await safe.getThreshold());
           setLoading(false);
         } catch (e: any) {
           setSafe(undefined);
+          setThreshold(undefined);
           setError(e);
           setLoading(false);
         }
       } else {
         setSafe(undefined);
+        setThreshold(undefined);
         setError(undefined);
         setLoading(false);
       }
@@ -104,6 +109,9 @@ export const SafeDashboard: React.FC = () => {
           <Box mt={4}>
             <Owners safe={safe} />
           </Box>
+          <Heading size="sm" mt={4}>
+            Threshold: {threshold}
+          </Heading>
           <Box mt={4}>
             <SendTransaction safe={safe} />
           </Box>

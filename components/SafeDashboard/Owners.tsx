@@ -110,7 +110,7 @@ export const Owners: React.FC<{
       </Box>
       <ButtonGroup mt={4} variant="outline">
         <Input
-          placeholder="New owner address"
+          placeholder="New owner"
           onChange={(event) => setNewOwnerAddress(event.target.value)}
         />
         <IconButton
