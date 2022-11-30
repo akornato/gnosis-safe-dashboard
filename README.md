@@ -11,4 +11,4 @@ Deployed to https://gnosis-safe-dashboard-flax.vercel.app
 
 ## Getting Started
 
-- `yarn web:dev` starts the web app at [https://localhost:4000/](https://localhost:4000/). Note its HTTPS rather than HTTP - SSL is required for Gnosis custom apps - so local Next.js port is mapped with [local-ssl-proxy](https://github.com/cameronhunter/local-ssl-proxy). You can also go to your Gnosis Safe, Apps, add custom app, and paste in the same URL. 
+- `npm run dev` starts the web app at [https://localhost:4000/](https://localhost:4000/). Note its HTTPS rather than HTTP - SSL is required for Gnosis custom apps - so local Next.js port is mapped with [local-ssl-proxy](https://github.com/cameronhunter/local-ssl-proxy). You can also go to your Gnosis Safe, Apps, add custom app, and paste in the same URL. 
