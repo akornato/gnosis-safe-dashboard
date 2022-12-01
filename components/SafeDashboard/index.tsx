@@ -13,16 +13,18 @@ import {
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
 import { ethers } from "ethers";
-import { useSigner } from "wagmi";
+import { useSigner, useNetwork } from "wagmi";
 import Safe from "@safe-global/safe-core-sdk";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import EthersAdapter from "@safe-global/safe-ethers-lib";
+import SafeServiceClient from "@safe-global/safe-service-client";
 import { Owners } from "./Owners";
 import { NewSafe } from "./NewSafe";
 import { SendTransaction } from "./SendTransaction";
 
 export const SafeDashboard: React.FC = () => {
   const { query, push } = useRouter();
+  const { chain } = useNetwork();
   const { safe: safeInfo } = useSafeAppsSDK();
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -30,10 +32,11 @@ export const SafeDashboard: React.FC = () => {
   const [threshold, setThreshold] = useState<number>();
   const { data: signer } = useSigner();
   const safeAddress = safeInfo.safeAddress || query?.safeAddress?.toString();
+  const [safeService, setSafeService] = useState<SafeServiceClient>();
 
   useEffect(() => {
     (async () => {
-      if (signer && safeAddress) {
+      if (chain && signer && safeAddress) {
         setSafe(undefined);
         setError(undefined);
         setLoading(true);
@@ -48,21 +51,31 @@ export const SafeDashboard: React.FC = () => {
           });
           setSafe(safe);
           setThreshold(await safe.getThreshold());
+          const safeService = new SafeServiceClient({
+            txServiceUrl: `https://safe-transaction-${chain?.network.replace(
+              "homestead",
+              "mainnet"
+            )}.safe.global`,
+            ethAdapter,
+          });
+          setSafeService(safeService);
           setLoading(false);
         } catch (e: any) {
           setSafe(undefined);
           setThreshold(undefined);
+          setSafeService(undefined);
           setError(e);
           setLoading(false);
         }
       } else {
         setSafe(undefined);
         setThreshold(undefined);
+        setSafeService(undefined);
         setError(undefined);
         setLoading(false);
       }
     })();
-  }, [signer, safeAddress]);
+  }, [chain, signer, safeAddress]);
 
   return (
     <>
@@ -113,9 +126,13 @@ export const SafeDashboard: React.FC = () => {
           <Box mt={4}>
             <Owners safe={safe} />
           </Box>
-          <Text mt={4}>Threshold: {threshold}</Text>
+          <Text mt={4}>Threshold: {threshold} owners</Text>
           <Box mt={4}>
-            <SendTransaction safe={safe} />
+            <SendTransaction
+              safe={safe}
+              threshold={threshold}
+              safeService={safeService}
+            />
           </Box>
         </>
       )}

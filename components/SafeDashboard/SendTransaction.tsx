@@ -10,8 +10,10 @@ import {
   AlertDescription,
   Text,
 } from "@chakra-ui/react";
-import { useBalance } from "wagmi";
+import { useBalance, useAccount } from "wagmi";
 import Safe from "@safe-global/safe-core-sdk";
+import SafeServiceClient from "@safe-global/safe-service-client";
+import type { MetaTransactionData } from "@safe-global/safe-core-sdk-types";
 
 const getTokenTxData = async (
   toAddress: string,
@@ -62,7 +64,10 @@ const getSafeTransactionData = async (
 
 export const SendTransaction: React.FC<{
   safe: Safe;
-}> = ({ safe }) => {
+  threshold?: number;
+  safeService?: SafeServiceClient;
+}> = ({ safe, threshold, safeService }) => {
+  const { address: connectedAddress } = useAccount();
   const [toAddress, setToAddress] = useState<string>();
   const [tokenAddress, setTokenAddress] = useState<string>();
   const [amount, setAmount] = useState<BigNumber>();
@@ -81,28 +86,48 @@ export const SendTransaction: React.FC<{
     watch: true,
   });
 
-  const sendTransaction = useCallback(async () => {
+  const proposeTransaction = useCallback(async () => {
     if (toAddress) {
       try {
         setError(undefined);
         setLoading(true);
-        const safeTransactionData = await getSafeTransactionData(
-          toAddress,
-          amount,
-          tokenAddress,
-          tokenAmount
-        );
+        const safeTransactionData: MetaTransactionData[] =
+          await getSafeTransactionData(
+            toAddress,
+            amount,
+            tokenAddress,
+            tokenAmount
+          );
         const safeTransaction = await safe.createTransaction({
           safeTransactionData,
         });
-        await safe.executeTransaction(safeTransaction);
+        if (connectedAddress && safeService) {
+          const safeTxHash = await safe.getTransactionHash(safeTransaction);
+          const signature = await safe.signTransactionHash(safeTxHash);
+          await safeService.proposeTransaction({
+            safeAddress: safe.getAddress(),
+            senderAddress: connectedAddress,
+            safeTransactionData: safeTransaction.data,
+            safeTxHash: safeTxHash,
+            senderSignature: signature.data,
+          });
+          await safeService.confirmTransaction(safeTxHash, signature.data);
+        }
       } catch (e: any) {
         setError(e);
       } finally {
         setLoading(false);
       }
     }
-  }, [toAddress, amount, tokenAddress, tokenAmount, safe]);
+  }, [
+    toAddress,
+    amount,
+    tokenAddress,
+    tokenAmount,
+    safe,
+    safeService,
+    connectedAddress,
+  ]);
 
   return safeBalance ? (
     <>
@@ -163,10 +188,10 @@ export const SendTransaction: React.FC<{
         colorScheme="green"
         isLoading={loading}
         disabled={!toAddress || loading}
-        onClick={sendTransaction}
-        loadingText={"Send from Safe"}
+        onClick={proposeTransaction}
+        loadingText="Propose transaction"
       >
-        Send from Safe
+        Propose transaction
       </Button>
       {(error || tokenError) && (
         <Alert status="error" mt={4}>
