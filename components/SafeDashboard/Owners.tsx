@@ -20,7 +20,11 @@ const Address: React.FC<{ address: string }> = ({ address }) => {
   const ensName = useEnsName({
     address,
   });
-  return <>{address + (ensName.data ? ` (${ensName.data})` : "")}</>;
+  return (
+    <Text wordBreak="break-all">
+      {address + (ensName.data ? ` (${ensName.data})` : "")}
+    </Text>
+  );
 };
 
 export const Owners: React.FC<{
