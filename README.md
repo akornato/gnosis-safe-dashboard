@@ -1,6 +1,8 @@
 ## Gnosis Safe dashboard
 
-This app allows to create a new Gnosis Safe, add/remove its owners, and execute both native and ERC20 token transfer transactions. If loaded in [Gnosis Safe](https://gnosis-safe.io) iframe, it detects Safe address automatically. If loaded outside of Gnosis Safe iframe, you need to enter Safe address manually (or create new one).
+This app allows to create a new Gnosis Safe, add/remove its owners, and propose a new transaction that may include both native and ERC20 token transfers.
+
+If loaded in [Gnosis Safe](https://gnosis-safe.io) iframe, it detects Safe address automatically. If loaded outside of Gnosis Safe iframe, you need to enter Safe address manually (or create a new one).
 
 Deployed to https://gnosis-safe-dashboard-flax.vercel.app
 
