@@ -11,7 +11,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useBalance } from "wagmi";
-import Safe from "@gnosis.pm/safe-core-sdk";
+import Safe from "@safe-global/safe-core-sdk";
 
 const getTokenTxData = async (
   toAddress: string,

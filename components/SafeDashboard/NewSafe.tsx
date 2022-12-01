@@ -15,8 +15,11 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useSigner } from "wagmi";
-import Safe, { SafeFactory, SafeAccountConfig } from "@gnosis.pm/safe-core-sdk";
-import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
+import Safe, {
+  SafeFactory,
+  SafeAccountConfig,
+} from "@safe-global/safe-core-sdk";
+import EthersAdapter from "@safe-global/safe-ethers-lib";
 
 export const NewSafe: React.FC = () => {
   const { push } = useRouter();
@@ -30,7 +33,7 @@ export const NewSafe: React.FC = () => {
       setLoading(true);
       const ethAdapter = new EthersAdapter({
         ethers,
-        signer,
+        signerOrProvider: signer,
       });
       const safeFactory = await SafeFactory.create({ ethAdapter });
       const safeAccountConfig: SafeAccountConfig = {

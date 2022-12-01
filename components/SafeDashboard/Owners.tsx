@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import Safe from "@gnosis.pm/safe-core-sdk";
+import Safe from "@safe-global/safe-core-sdk";
 import { useEnsName } from "wagmi";
 import {
   ButtonGroup,

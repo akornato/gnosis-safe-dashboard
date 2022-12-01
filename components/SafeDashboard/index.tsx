@@ -14,9 +14,9 @@ import {
 import { MdCheckCircle } from "react-icons/md";
 import { ethers } from "ethers";
 import { useSigner } from "wagmi";
-import Safe from "@gnosis.pm/safe-core-sdk";
+import Safe from "@safe-global/safe-core-sdk";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
-import EthersAdapter from "@gnosis.pm/safe-ethers-lib";
+import EthersAdapter from "@safe-global/safe-ethers-lib";
 import { Owners } from "./Owners";
 import { NewSafe } from "./NewSafe";
 import { SendTransaction } from "./SendTransaction";
@@ -39,7 +39,7 @@ export const SafeDashboard: React.FC = () => {
         setLoading(true);
         const ethAdapter = new EthersAdapter({
           ethers,
-          signer,
+          signerOrProvider: signer,
         });
         try {
           const safe = await Safe.create({
