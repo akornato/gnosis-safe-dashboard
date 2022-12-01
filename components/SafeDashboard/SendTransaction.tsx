@@ -95,8 +95,7 @@ export const SendTransaction: React.FC<{
         const safeTransaction = await safe.createTransaction({
           safeTransactionData,
         });
-        const txResponse = await safe.executeTransaction(safeTransaction);
-        await txResponse.transactionResponse?.wait();
+        await safe.executeTransaction(safeTransaction);
       } catch (e: any) {
         setError(e);
       } finally {
