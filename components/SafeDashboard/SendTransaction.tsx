@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { BigNumber } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import {
   InputGroup,
   InputLeftAddon,
@@ -13,6 +13,53 @@ import {
 import { useBalance } from "wagmi";
 import Safe from "@gnosis.pm/safe-core-sdk";
 
+const getTokenTxData = async (
+  toAddress: string,
+  tokenAddress: string,
+  tokenAmount: BigNumber
+) => {
+  if (tokenAddress && tokenAmount) {
+    const token = new ethers.Contract(tokenAddress, [
+      "function transfer(address to, uint value) payable",
+    ]);
+    const unsignedTransaction = await token.populateTransaction.transfer(
+      toAddress,
+      tokenAmount
+    );
+    return unsignedTransaction.data || "0x";
+  }
+  return "0x";
+};
+
+const getSafeTransactionData = async (
+  toAddress?: string,
+  amount?: BigNumber,
+  tokenAddress?: string,
+  tokenAmount?: BigNumber
+) => {
+  const data = [];
+  if (toAddress && amount) {
+    data.push({
+      to: toAddress,
+      value: amount.toString(),
+      data: "0x",
+    });
+  }
+  if (toAddress && tokenAddress && tokenAmount) {
+    const txTokenData = await getTokenTxData(
+      toAddress,
+      tokenAddress,
+      tokenAmount
+    );
+    data.push({
+      to: tokenAddress,
+      value: "0",
+      data: txTokenData,
+    });
+  }
+  return data;
+};
+
 export const SendTransaction: React.FC<{
   safe: Safe;
 }> = ({ safe }) => {
@@ -25,11 +72,13 @@ export const SendTransaction: React.FC<{
   const { data: safeBalance } = useBalance({
     addressOrName: safe?.getAddress(),
     enabled: !!safe,
+    watch: true,
   });
   const { data: tokenBalance, error: tokenError } = useBalance({
     addressOrName: safe?.getAddress(),
     token: tokenAddress,
     enabled: !!safe && !!tokenAddress,
+    watch: true,
   });
 
   const sendTransaction = useCallback(async () => {
@@ -37,12 +86,14 @@ export const SendTransaction: React.FC<{
       try {
         setError(undefined);
         setLoading(true);
+        const safeTransactionData = await getSafeTransactionData(
+          toAddress,
+          amount,
+          tokenAddress,
+          tokenAmount
+        );
         const safeTransaction = await safe.createTransaction({
-          safeTransactionData: {
-            to: toAddress,
-            value: (amount || BigNumber.from(0)).toString(),
-            data: "0x",
-          },
+          safeTransactionData,
         });
         const txResponse = await safe.executeTransaction(safeTransaction);
         await txResponse.transactionResponse?.wait();
@@ -52,7 +103,7 @@ export const SendTransaction: React.FC<{
         setLoading(false);
       }
     }
-  }, [toAddress, amount, safe]);
+  }, [toAddress, amount, tokenAddress, tokenAmount, safe]);
 
   return safeBalance ? (
     <>
@@ -73,8 +124,7 @@ export const SendTransaction: React.FC<{
           value={amount?.toString() || ""}
           onChange={(event) => {
             try {
-              const amount = BigNumber.from(event.target.value);
-              setAmount(amount);
+              setAmount(BigNumber.from(event.target.value));
             } catch {
               setAmount(undefined);
             }
@@ -100,8 +150,7 @@ export const SendTransaction: React.FC<{
               value={tokenAmount?.toString() || ""}
               onChange={(event) => {
                 try {
-                  const tokenAmount = BigNumber.from(event.target.value);
-                  setTokenAmount(tokenAmount);
+                  setTokenAmount(BigNumber.from(event.target.value));
                 } catch {
                   setTokenAmount(undefined);
                 }
