@@ -20,7 +20,7 @@ import EthersAdapter from "@safe-global/safe-ethers-lib";
 import SafeServiceClient from "@safe-global/safe-service-client";
 import { Owners } from "./Owners";
 import { NewSafe } from "./NewSafe";
-import { SendTransaction } from "./SendTransaction";
+import { NewTransaction } from "./NewTransaction";
 
 export const SafeDashboard: React.FC = () => {
   const { query, push } = useRouter();
@@ -126,13 +126,9 @@ export const SafeDashboard: React.FC = () => {
           <Box mt={4}>
             <Owners safe={safe} />
           </Box>
-          <Text mt={4}>Threshold: {threshold} owners</Text>
+          {threshold && <Text mt={4}>Threshold: {threshold} owners</Text>}
           <Box mt={4}>
-            <SendTransaction
-              safe={safe}
-              threshold={threshold}
-              safeService={safeService}
-            />
+            <NewTransaction safe={safe} safeService={safeService} />
           </Box>
         </>
       )}

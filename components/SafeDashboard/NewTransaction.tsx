@@ -9,6 +9,12 @@ import {
   AlertIcon,
   AlertDescription,
   Text,
+  Box,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from "@chakra-ui/react";
 import { useBalance, useAccount } from "wagmi";
 import Safe from "@safe-global/safe-core-sdk";
@@ -62,11 +68,10 @@ const getSafeTransactionData = async (
   return data;
 };
 
-export const SendTransaction: React.FC<{
+export const NewTransaction: React.FC<{
   safe: Safe;
-  threshold?: number;
   safeService?: SafeServiceClient;
-}> = ({ safe, threshold, safeService }) => {
+}> = ({ safe, safeService }) => {
   const { address: connectedAddress } = useAccount();
   const [toAddress, setToAddress] = useState<string>();
   const [tokenAddress, setTokenAddress] = useState<string>();
@@ -130,77 +135,89 @@ export const SendTransaction: React.FC<{
   ]);
 
   return safeBalance ? (
-    <>
-      <Text mt={4}>
-        Safe balance: {safeBalance?.formatted} {safeBalance.symbol}
-      </Text>
-      <InputGroup mt={4}>
-        <InputLeftAddon>Destination address</InputLeftAddon>
-        <Input
-          value={toAddress || ""}
-          onChange={(event) => setToAddress(event.target.value)}
-        />
-      </InputGroup>
-      <InputGroup mt={4}>
-        <InputLeftAddon>{safeBalance.symbol} amount in wei</InputLeftAddon>
-        <Input
-          type="number"
-          value={amount?.toString() || ""}
-          onChange={(event) => {
-            try {
-              setAmount(BigNumber.from(event.target.value));
-            } catch {
-              setAmount(undefined);
-            }
-          }}
-        />
-      </InputGroup>
-      <InputGroup mt={4}>
-        <InputLeftAddon>Token address</InputLeftAddon>
-        <Input
-          value={tokenAddress || ""}
-          onChange={(event) => setTokenAddress(event.target.value)}
-        />
-      </InputGroup>
-      {tokenAddress && tokenBalance && (
-        <>
+    <Accordion allowToggle backgroundColor="gray.50">
+      <AccordionItem>
+        <AccordionButton px={4}>
+          <Box flex="1" textAlign="left">
+            <Text>New transaction</Text>
+          </Box>
+          <AccordionIcon />
+        </AccordionButton>
+        <AccordionPanel>
           <Text mt={4}>
-            Token balance: {tokenBalance?.formatted} {tokenBalance.symbol}
+            Safe balance: {safeBalance?.formatted} {safeBalance.symbol}
           </Text>
           <InputGroup mt={4}>
-            <InputLeftAddon>{tokenBalance.symbol} amount in wei</InputLeftAddon>
+            <InputLeftAddon>Destination address</InputLeftAddon>
+            <Input
+              value={toAddress || ""}
+              onChange={(event) => setToAddress(event.target.value)}
+            />
+          </InputGroup>
+          <InputGroup mt={4}>
+            <InputLeftAddon>{safeBalance.symbol} amount in wei</InputLeftAddon>
             <Input
               type="number"
-              value={tokenAmount?.toString() || ""}
+              value={amount?.toString() || ""}
               onChange={(event) => {
                 try {
-                  setTokenAmount(BigNumber.from(event.target.value));
+                  setAmount(BigNumber.from(event.target.value));
                 } catch {
-                  setTokenAmount(undefined);
+                  setAmount(undefined);
                 }
               }}
             />
           </InputGroup>
-        </>
-      )}
-      <Button
-        mt={4}
-        colorScheme="green"
-        isLoading={loading}
-        disabled={!toAddress || loading}
-        onClick={proposeTransaction}
-        loadingText="Propose transaction"
-      >
-        Propose transaction
-      </Button>
-      {(error || tokenError) && (
-        <Alert status="error" mt={4}>
-          <AlertIcon />
-          <AlertDescription>
-            {error?.message || tokenError?.message}
-          </AlertDescription>
-        </Alert>
-      )}
-    </>
+          <InputGroup mt={4}>
+            <InputLeftAddon>Token address</InputLeftAddon>
+            <Input
+              value={tokenAddress || ""}
+              onChange={(event) => setTokenAddress(event.target.value)}
+            />
+          </InputGroup>
+          {tokenAddress && tokenBalance && (
+            <>
+              <Text mt={4}>
+                Token balance: {tokenBalance?.formatted} {tokenBalance.symbol}
+              </Text>
+              <InputGroup mt={4}>
+                <InputLeftAddon>
+                  {tokenBalance.symbol} amount in wei
+                </InputLeftAddon>
+                <Input
+                  type="number"
+                  value={tokenAmount?.toString() || ""}
+                  onChange={(event) => {
+                    try {
+                      setTokenAmount(BigNumber.from(event.target.value));
+                    } catch {
+                      setTokenAmount(undefined);
+                    }
+                  }}
+                />
+              </InputGroup>
+            </>
+          )}
+          <Button
+            mt={4}
+            colorScheme="green"
+            isLoading={loading}
+            disabled={!toAddress || loading}
+            onClick={proposeTransaction}
+            loadingText="Propose"
+          >
+            Propose
+          </Button>
+          {(error || tokenError) && (
+            <Alert status="error" mt={4}>
+              <AlertIcon />
+              <AlertDescription>
+                {error?.message || tokenError?.message}
+              </AlertDescription>
+            </Alert>
+          )}
+        </AccordionPanel>
+      </AccordionItem>
+    </Accordion>
   ) : null;
 };
